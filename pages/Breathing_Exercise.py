@@ -63,10 +63,55 @@ def set_background_for_theme(selected_palette="pink"):
             text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
         }}
 
-        h2, h3, h4, h5, h6,
-        p, span, strong, div, label {{
-            color: {'#f0f0f0' if is_dark else 'rgba(49, 51, 63, 0.8)'} !important;
+        h2, h3, h4, h5, h6 {{
+            color: {'#f0f0f0' if is_dark else 'rgba(49, 51, 63, 0.9)'} !important;
             transition: color 0.3s ease;
+        }}
+
+        p, span, strong, div, label {{
+            color: {'#f0f0f0' if is_dark else 'rgba(49, 51, 63, 0.85)'} !important;
+            transition: color 0.3s ease;
+        }}
+
+        /* Fix select/dropdown boxes */
+        [data-baseweb="select"] {{
+            background-color: {'rgba(50, 50, 50, 0.8)' if is_dark else 'rgba(255, 255, 255, 0.9)'} !important;
+        }}
+
+        [data-baseweb="select"] > div {{
+            background-color: {'rgba(50, 50, 50, 0.8)' if is_dark else 'rgba(255, 255, 255, 0.9)'} !important;
+            color: {'#f0f0f0' if is_dark else '#1f2937'} !important;
+        }}
+
+        /* Dropdown menu options */
+        [role="listbox"] {{
+            background-color: {'rgba(50, 50, 50, 0.95)' if is_dark else 'rgba(255, 255, 255, 0.95)'} !important;
+        }}
+
+        [role="option"] {{
+            background-color: {'rgba(50, 50, 50, 0.95)' if is_dark else 'rgba(255, 255, 255, 0.95)'} !important;
+            color: {'#f0f0f0' if is_dark else '#1f2937'} !important;
+        }}
+
+        [role="option"]:hover {{
+            background-color: {'rgba(70, 70, 70, 0.95)' if is_dark else 'rgba(243, 244, 246, 0.95)'} !important;
+        }}
+
+        /* Fix buttons */
+        .stButton > button {{
+            background-color: {'rgba(59, 130, 246, 0.9)' if is_dark else 'rgb(59, 130, 246)'} !important;
+            color: white !important;
+            border: none !important;
+            font-weight: 600 !important;
+        }}
+
+        .stButton > button:hover {{
+            background-color: {'rgba(37, 99, 235, 0.9)' if is_dark else 'rgb(37, 99, 235)'} !important;
+        }}
+
+        /* Fix slider labels and text */
+        .stSlider label {{
+            color: {'#f0f0f0' if is_dark else 'rgba(49, 51, 63, 0.9)'} !important;
         }}
 
         /* Header bar: fully transparent */
