@@ -226,6 +226,20 @@ def show():
     st.subheader("📋 Current Openings")
     
     # Enhanced job openings with details
+    # --- Careers Header Section ---
+    with st.container():
+        st.markdown("""
+        <div class="career-container">
+            <h1>🚀 Careers at TalkHeal</h1>
+            <p>Join our mission to support mental wellness and make a real impact!</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.divider()
+
+    # --- Job Listings ---
+    st.subheader("📌 Current Openings")
+
     openings = {
         "Community Manager": {
             "icon": "🤝",
@@ -372,6 +386,49 @@ def show():
                     st.error(error)
             else:
                 # Create a directory for applications if it doesn't exist
+
+    for role, icon in openings.items():
+        st.markdown(f"<div class='opening-item'><span>{icon}</span>{role}</div>", unsafe_allow_html=True)
+
+    st.divider()
+
+    # --- Application Form ---
+    st.subheader("📄 Apply Now")
+
+    with st.form("application_form", clear_on_submit=True):
+        name = st.text_input("Full Name")
+        email = st.text_input("Email Address")
+        position = st.selectbox("Position", options=list(openings.keys()))
+        resume = st.file_uploader("Upload Your Resume", type=["pdf", "docx"])
+        cover_letter = st.text_area("Cover Letter (Optional)")
+
+        submitted = st.form_submit_button("Submit Application")
+
+        if submitted:
+            # Validation
+            def is_valid_email(email):
+                return re.match(r'^[\w\.-]+@[\w\.-]+\.\w+$', email) is not None
+            
+            errors = []
+            
+            if not name:
+                errors.append("Full Name is required")
+            if not email:
+                errors.append("Email Address is required")
+            elif not is_valid_email(email):
+                errors.append("Please enter a valid email address")
+            if not position:
+                errors.append("Position is required")
+            if not resume:
+                errors.append("Resume is required")
+            if not consent:
+                errors.append("You must agree to data processing to continue")
+            
+            if errors:
+                for error in errors:
+                    st.error(error)
+            else:
+                # Create a directory for applications if it doesn't exist
                 if not os.path.exists("data/applications"):
                     os.makedirs("data/applications")
 
@@ -442,3 +499,11 @@ def show():
 show()
 
 
+                    f.write(f"Cover Letter:\n{cover_letter}")
+
+show()
+
+
+    st.info("More roles and opportunities coming soon!")
+    
+show()
