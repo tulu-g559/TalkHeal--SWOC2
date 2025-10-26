@@ -5,12 +5,10 @@ from auth.auth_utils import register_user, authenticate_user , check_user
 from auth.mail_utils import send_reset_email
 from auth.jwt_utils import create_reset_token
 from core.utils import set_authenticated_user
- main
 from auth.oauth_utils import get_oauth_login_url
 from auth.oauth_config import oauth_config
-
 from auth.password_validator import PasswordValidator
- main
+
 def validate_email(email):
     """Validate email format"""
     pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'

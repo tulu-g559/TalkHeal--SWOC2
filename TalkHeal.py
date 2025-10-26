@@ -13,12 +13,10 @@ no_sidebar_style = """
 """
 st.markdown(no_sidebar_style, unsafe_allow_html=True)
 
-# --- DB Initialization ---
 if "db_initialized" not in st.session_state:
     init_db()
     st.session_state["db_initialized"] = True
     
-# --- OAUTH CALLBACK HANDLING ---
 def _get_query_params():
     """Return query params compatible with older/newer Streamlit versions."""
     try:
@@ -36,13 +34,11 @@ if _qp.get("code") and _qp.get("state") and _qp.get("provider"):
     handle_oauth_callback()
     st.stop()
 
-# --- LOGIN PAGE ---
 if not st.session_state.get("authenticated", False):
     show_login_page()
     st.stop()
 
 
-# Add responsive navigation CSS
 st.markdown("""
 <style>
 @media (max-width: 768px) {
@@ -84,15 +80,14 @@ with col_buttons:
     # Create a container with responsive class
     st.markdown('<div class="nav-button-container">', unsafe_allow_html=True)
     
-    # Use smaller column ratios for better mobile handling
     nav_cols = st.columns([1, 1.5, 1, 1])
     
     with nav_cols[0]:
         is_dark = st.session_state.get('dark_mode', False)
         if st.button("🌙" if is_dark else "☀", key="top_theme_toggle", help="Toggle Light/Dark Mode", use_container_width=True):
-                st.session_state.dark_mode = not is_dark
-                st.session_state.theme_changed = True
-                st.rerun()
+            st.session_state.dark_mode = not is_dark
+            st.session_state.theme_changed = True
+            st.rerun()
     with nav_cols[1]:
         if st.button("🚨 Emergency Help", key="emergency_main_btn", help="Open crisis resources", use_container_width=True, type="secondary"):
             st.session_state.show_emergency_page = True
@@ -105,7 +100,7 @@ with col_buttons:
             for key in ["authenticated", "user_profile"]:
                 if key in st.session_state:
                     del st.session_state[key]
-                    st.rerun()
+            st.rerun()
     
     st.markdown('</div>', unsafe_allow_html=True)
 
@@ -121,7 +116,7 @@ from components.focus_session import render_focus_session
 from components.profile import apply_global_font_size
 from components.games import show_games_page
 
-# --- 1. INITIALIZE SESSION STATE ---
+
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
 if "conversations" not in st.session_state:
@@ -151,7 +146,6 @@ if "pinned_messages" not in st.session_state:
 if "active_page" not in st.session_state:
     st.session_state.active_page = "TalkHeal"  # default
 
-# --- Footer Navigation State ---
 if "show_privacy_policy" not in st.session_state:
     st.session_state.show_privacy_policy = False
 
@@ -162,14 +156,11 @@ if st.session_state.show_privacy_policy:
     show_footer()
     st.stop()
 
-# --- 2. SET PAGE CONFIG ---
 apply_global_font_size()
 
-# --- 3. APPLY STYLES & CONFIGURATIONS ---
 apply_custom_css()
 model = configure_gemini()
 
-# --- 4. TONE SELECTION DROPDOWN IN SIDEBAR ---
 TONE_OPTIONS = {
     "Compassionate Listener": "You are a compassionate listener — soft, empathetic, patient — like a therapist who listens without judgment.",
     "Motivating Coach": "You are a motivating coach — energetic, encouraging, and action-focused — helping the user push through rough days.",
@@ -178,7 +169,6 @@ TONE_OPTIONS = {
     "Mindfulness Guide": "You are a mindfulness guide — calm, slow, and grounding — focused on breathing, presence, and awareness."
 }
 
-# --- 5. DEFINE FUNCTION TO GET TONE PROMPT ---
 def get_tone_prompt():
     return TONE_OPTIONS.get(st.session_state.get("selected_tone", "Compassionate Listener"), TONE_OPTIONS["Compassionate Listener"])
 
@@ -535,7 +525,7 @@ else:
                         st.info(mood_responses.get(selected_mood, "Thanks for sharing how you're feeling!"))
 
                     except Exception as e:
-                        st.error(f"❌ Error saving mood entry: {str(e)}")
+                        st.error(f"Error saving mood entry: {str(e)}")
 
         # Right: full summary (as before)
         with right_col:
