@@ -34,6 +34,11 @@ if _qp.get("code") and _qp.get("state") and _qp.get("provider"):
     handle_oauth_callback()
     st.stop()
 
+# Restore session from cookie if not already authenticated
+if not st.session_state.get("authenticated", False):
+    from auth.session_manager import restore_session_from_storage
+    restore_session_from_storage()
+
 if not st.session_state.get("authenticated", False):
     show_login_page()
     st.stop()
@@ -97,7 +102,9 @@ with col_buttons:
             st.switch_page("pages/About.py")
     with nav_cols[3]:
         if st.button("Logout", key="logout_btn", help="Sign out", use_container_width=True):
-            for key in ["authenticated", "user_profile"]:
+            from auth.session_manager import clear_session_cookie
+            clear_session_cookie()
+            for key in ["authenticated", "user_profile", "user_name"]:
                 if key in st.session_state:
                     del st.session_state[key]
             st.rerun()

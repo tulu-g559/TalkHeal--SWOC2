@@ -16,6 +16,7 @@ bcrypt
 pygame
 streamlit-modal
 streamlit_js_eval
+extra-streamlit-components
 scikit-learn
 joblib
 numpy

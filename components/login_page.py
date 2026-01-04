@@ -431,16 +431,20 @@ def show_login_page():
                     try:
                         success, user = authenticate_user(email, password)
                         if success:
-                            st.session_state.authenticated = True
-                            st.session_state.user_profile = {
+                            from auth.session_manager import set_session_cookie
+                            user_profile = {
                                 "name": user.get("name", ""),
                                 "email": user.get("email", email),
                                 "profile_picture": user.get("photo", None),
                                 "join_date": user.get("join_date", datetime.now().strftime("%B %Y")),
                                 "font_size": user.get("font_size", "Medium")
                             }
+                            st.session_state.authenticated = True
+                            st.session_state.user_profile = user_profile
                             # Set user_name for display purposes
                             st.session_state.user_name = user.get("name", email)
+                            # Save session to cookie
+                            set_session_cookie(email, user_profile)
                             st.rerun()
                                             
                         else:
@@ -493,19 +497,21 @@ def show_login_page():
             # Guest Login Button with Full Logic
             st.markdown('<div class="auth-button">', unsafe_allow_html=True)
             if st.button("Login as Guest"):
-                # Set the authentication flag to True, just like in a real login
-                st.session_state.authenticated = True
-                
+                from auth.session_manager import set_session_cookie
                 # Create a simple, fake user profile for the Guest
-                st.session_state.user_profile = {
+                user_profile = {
                     "name": "Guest Healer",
                     "email": "guest@talkheal.app",
                     "profile_picture": None,
                     "join_date": datetime.now().strftime("%B %Y"),
                     "font_size": "Medium"
                 }
-                # Fix: Use the user_profile instead of undefined 'user' variable
-                st.session_state.user_name = st.session_state.user_profile["name"]
+                # Set the authentication flag
+                st.session_state.authenticated = True
+                st.session_state.user_profile = user_profile
+                st.session_state.user_name = user_profile["name"]
+                # Save session to cookie
+                set_session_cookie("guest@talkheal.app", user_profile)
                 # Rerun the app to enter the main dashboard
                 st.rerun()
             st.markdown('</div>', unsafe_allow_html=True)

@@ -226,8 +226,7 @@ def handle_oauth_callback(provider_name: str, code: str, state: str) -> Tuple[bo
             return False, user_info.get("error", "Failed to create/get user")
         
         # Set session state
-        st.session_state.authenticated = True
-        st.session_state.user_profile = {
+        user_profile = {
             "name": user_info["name"],
             "email": user_info["email"],
             "profile_picture": user_info["profile_picture"],
@@ -237,7 +236,13 @@ def handle_oauth_callback(provider_name: str, code: str, state: str) -> Tuple[bo
             "provider_id": user_info["provider_id"],
             "verified": user_info["verified"]
         }
+        st.session_state.authenticated = True
+        st.session_state.user_profile = user_profile
         st.session_state.user_name = user_info["name"]
+        
+        # Save session to cookie for persistence across page refreshes
+        from auth.session_manager import set_session_cookie
+        set_session_cookie(user_info["email"], user_profile)
         
         # Clean up OAuth state
         if "oauth_states" in st.session_state and state in st.session_state.oauth_states:
