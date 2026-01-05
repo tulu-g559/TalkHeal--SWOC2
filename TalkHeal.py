@@ -189,6 +189,97 @@ if not st.session_state.conversations:
         st.session_state.active_conversation = 0
     st.rerun()
 
+# --- ONBOARDING SECTION ---
+def render_onboarding_section():
+    """Render onboarding walkthrough for new users"""
+    
+    # Check if user has seen onboarding
+    if "onboarding_seen" not in st.session_state:
+        st.session_state.onboarding_seen = False
+    
+    # Show onboarding for first-time users or if user clicks "Show Guide"
+    if not st.session_state.onboarding_seen or st.session_state.get("show_onboarding_guide", False):
+        st.markdown("""
+        <div style="background: linear-gradient(135deg, rgba(255, 182, 193, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%); 
+                    border-radius: 16px; 
+                    padding: 2rem; 
+                    margin: 2rem 0; 
+                    border-left: 4px solid #ff69b4;">
+            <h2 style="color: #d6336c; margin-top: 0;">👋 Welcome to TalkHeal</h2>
+            <p style="font-size: 1.1rem; line-height: 1.6; margin-bottom: 1.5rem;">
+                Your safe space for mental health support, available 24/7. We're here to listen, 
+                guide, and support you on your wellness journey.
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # How to Use Section
+        with st.expander("📚 How to Use TalkHeal (3 Simple Steps)", expanded=not st.session_state.onboarding_seen):
+            st.markdown("""
+            ### Getting Started
+            
+            **Step 1: Choose Your Experience**
+            - 💬 Start a conversation with our AI companion below
+            - 🧘‍♀️ Explore wellness tools (Yoga, Breathing, Journaling)
+            - 📊 Track your mood and view insights over time
+            
+            **Step 2: Personalize Your Support**
+            - Select an AI personality that resonates with you (Compassionate Listener, Motivating Coach, etc.)
+            - Share as much or as little as you're comfortable with
+            - Use the sidebar to access different features anytime
+            
+            **Step 3: Build Your Wellness Routine**
+            - Track your daily mood to identify patterns
+            - Try guided exercises when you need support
+            - Access crisis resources anytime via the 🚨 Emergency Help button
+            
+            ---
+            
+            ### 💡 Tips for Best Experience
+            - Be honest about how you're feeling—this is a judgment-free space
+            - Explore different features to find what works best for you
+            - Use the mood tracker regularly to gain insights into your emotional patterns
+            - Remember: You can always start a new conversation or switch tools
+            """)
+        
+        # Important Disclaimer
+        st.info("""
+        **📋 Important Disclaimer**
+        
+        TalkHeal is designed to provide support, coping strategies, and wellness resources. 
+        However, it is **not a substitute for professional mental health care**.
+        
+        If you're experiencing a crisis or need immediate support:
+        - Click the **🚨 Emergency Help** button above for crisis hotlines
+        - Contact a mental health professional or your doctor
+        - Call your local emergency services if you're in immediate danger
+        
+        Your wellbeing matters, and seeking professional help is a sign of strength. 💙
+        """)
+        
+        # Mark onboarding as seen after first view
+        if not st.session_state.onboarding_seen:
+            col1, col2, col3 = st.columns([1, 2, 1])
+            with col2:
+                if st.button("✅ Got it! Let's begin", use_container_width=True, type="primary"):
+                    st.session_state.onboarding_seen = True
+                    st.session_state.show_onboarding_guide = False
+                    st.rerun()
+        else:
+            # For returning users who clicked "Show Guide"
+            if st.button("✅ Close Guide", use_container_width=True):
+                st.session_state.show_onboarding_guide = False
+                st.rerun()
+    
+    # Add a small button for returning users to re-open the guide
+    if st.session_state.onboarding_seen and not st.session_state.get("show_onboarding_guide", False):
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col2:
+            if st.button("❔ Show Getting Started Guide", use_container_width=True):
+                st.session_state.show_onboarding_guide = True
+                st.rerun()
+        st.markdown("---")
+
 # --- 8. FEATURE CARDS FUNCTION ---
 def render_feature_cards():
     """Render beautiful feature cards showcasing app capabilities"""
@@ -375,6 +466,7 @@ elif st.session_state.active_page == "Games":
         show_games_page()
 else:
     with main_area:
+        render_onboarding_section()
         # Render the beautiful feature cards layout
         render_feature_cards()
         
