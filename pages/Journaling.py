@@ -148,70 +148,65 @@ def analyze_sentiment(entry: str) -> str:
 DB_PATH = "journals.db"
 
 def init_journal_db():
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS journal_entries (
-        id TEXT PRIMARY KEY,
-        email TEXT,
-        entry TEXT,
-        sentiment TEXT,
-        date TEXT,
-        tags TEXT
-    )
-    """)
-    conn.commit()
-    conn.close()
+    with sqlite3.connect(DB_PATH) as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS journal_entries (
+            id TEXT PRIMARY KEY,
+            email TEXT,
+            entry TEXT,
+            sentiment TEXT,
+            date TEXT,
+            tags TEXT
+        )
+        """)
+        conn.commit()
 
 def save_entry(email, entry, sentiment, tags):
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
-    cursor.execute("""
-    INSERT INTO journal_entries (id, email, entry, sentiment, date, tags)
-    VALUES (?, ?, ?, ?, ?, ?)
-    """, (str(uuid4()), email, entry, sentiment, str(date.today()), tags))
-    conn.commit()
-    conn.close()
+    with sqlite3.connect(DB_PATH) as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+        INSERT INTO journal_entries (id, email, entry, sentiment, date, tags)
+        VALUES (?, ?, ?, ?, ?, ?)
+        """, (str(uuid4()), email, entry, sentiment, str(date.today()), tags))
+        conn.commit()
 
 def fetch_entries(email, sentiment_filter=None, start_date=None, end_date=None, tag_filter=None, search_query=None):
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
-    query = """
-        SELECT id, entry, sentiment, date, tags FROM journal_entries
-        WHERE email = ?
-    """
-    params = [email]
-    if sentiment_filter and sentiment_filter != "All":
-        query += " AND sentiment = ?"
-        params.append(sentiment_filter)
-    if start_date and end_date:
-        query += " AND date BETWEEN ? AND ?"
-        params.extend([start_date.strftime("%Y-%m-%d"), end_date.strftime("%Y-%m-%d")])
-    if tag_filter:
-        for tag in tag_filter:
-            query += f" AND tags LIKE '%{tag}%'"
-    if search_query:
-        query += f" AND (entry LIKE '%{search_query}%' OR tags LIKE '%{search_query}%')"
+    with sqlite3.connect(DB_PATH) as conn:
+        cursor = conn.cursor()
+        query = """
+            SELECT id, entry, sentiment, date, tags FROM journal_entries
+            WHERE email = ?
+        """
+        params = [email]
+        if sentiment_filter and sentiment_filter != "All":
+            query += " AND sentiment = ?"
+            params.append(sentiment_filter)
+        if start_date and end_date:
+            query += " AND date BETWEEN ? AND ?"
+            params.extend([start_date.strftime("%Y-%m-%d"), end_date.strftime("%Y-%m-%d")])
+        if tag_filter:
+            for tag in tag_filter:
+                query += f" AND tags LIKE '%{tag}%'"
+        if search_query:
+            query += f" AND (entry LIKE '%{search_query}%' OR tags LIKE '%{search_query}%')"
 
-    query += " ORDER BY date ASC"
-    rows = cursor.execute(query, params).fetchall()
-    conn.close()
+        query += " ORDER BY date ASC"
+        rows = cursor.execute(query, params).fetchall()
     return rows
 
 def update_entry(entry_id, new_text, new_tags):
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
-    new_sentiment = analyze_sentiment(new_text)
-    cursor.execute("UPDATE journal_entries SET entry = ?, sentiment = ?, tags = ? WHERE id = ?", (new_text, new_sentiment, new_tags, entry_id))
-    conn.commit()
-    conn.close()
+    with sqlite3.connect(DB_PATH) as conn:
+        cursor = conn.cursor()
+        new_sentiment = analyze_sentiment(new_text)
+        cursor.execute("UPDATE journal_entries SET entry = ?, sentiment = ?, tags = ? WHERE id = ?", (new_text, new_sentiment, new_tags, entry_id))
+        conn.commit()
 
 def delete_entry(entry_id):
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
-    cursor.execute("DELETE FROM journal_entries WHERE id = ?", (entry_id,))
-    conn.commit()
-    conn.close()
+    with sqlite3.connect(DB_PATH) as conn:
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM journal_entries WHERE id = ?", (entry_id,))
+        conn.commit()
 
 def create_mood_trend_chart(entries):
     if not entries:

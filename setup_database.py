@@ -12,52 +12,49 @@ from auth.auth_utils import init_db
 
 def setup_journals_db():
     """Initialize the journals database"""
-    conn = sqlite3.connect("journals.db")
-    cursor = conn.cursor()
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS journal_entries (
-        id TEXT PRIMARY KEY,
-        email TEXT,
-        entry TEXT,
-        sentiment TEXT,
-        date TEXT
-    )
-    """)
-    conn.commit()
-    conn.close()
+    with sqlite3.connect("journals.db") as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS journal_entries (
+            id TEXT PRIMARY KEY,
+            email TEXT,
+            entry TEXT,
+            sentiment TEXT,
+            date TEXT
+        )
+        """)
+        conn.commit()
     print("Journals database initialized successfully")
 
 def setup_feedback_db():
     """Initialize the feedback database"""
-    conn = sqlite3.connect("feedback.db")
-    cursor = conn.cursor()
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS feedback (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_email TEXT,
-        convo_id INTEGER,
-        message TEXT,
-        feedback TEXT,
-        comment TEXT,
-        timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
-    )
-    """)
-    conn.commit()
-    conn.close()
+    with sqlite3.connect("feedback.db") as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS feedback (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_email TEXT,
+            convo_id INTEGER,
+            message TEXT,
+            feedback TEXT,
+            comment TEXT,
+            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+        """)
+        conn.commit()
     print("Feedback database initialized successfully")
 
 def update_feedback_table():
     """Add user_email column if it doesn't exist (for old DBs)"""
-    conn = sqlite3.connect("feedback.db")
-    c = conn.cursor()
-    try:
-        c.execute("ALTER TABLE feedback ADD COLUMN user_email TEXT")
-        print("✅ user_email column added to feedback table")
-    except sqlite3.OperationalError:
-        # Column already exists
-        print("ℹ️ user_email column already exists in feedback table")
-    conn.commit()
-    conn.close()
+    with sqlite3.connect("feedback.db") as conn:
+        c = conn.cursor()
+        try:
+            c.execute("ALTER TABLE feedback ADD COLUMN user_email TEXT")
+            print("✅ user_email column added to feedback table")
+        except sqlite3.OperationalError:
+            # Column already exists
+            print("ℹ️ user_email column already exists in feedback table")
+        conn.commit()
 
 def main():
     """Main setup function"""

@@ -466,38 +466,33 @@ def save_feedback(convo_id, message, feedback, comment=None):
     Comment: {comment if comment else "No comment"}
     """)
 
-    conn = None
     try:
-        conn = sqlite3.connect("feedback.db")
-        c = conn.cursor()
+        with sqlite3.connect("feedback.db") as conn:
+            c = conn.cursor()
 
-        c.execute('''
-            SELECT id FROM feedback WHERE user_email = ? AND convo_id = ? AND message = ?
-        ''', (hashed_email, convo_id, message))
-        row = c.fetchone()
-
-        if row:
             c.execute('''
-                UPDATE feedback
-                SET feedback = ?, comment = ?, timestamp = CURRENT_TIMESTAMP
-                WHERE id = ?
-            ''', (feedback, comment, row[0]))
-            print(f"[save_feedback] Updated existing feedback (id={row[0]})")
-        else:
-            c.execute('''
-                INSERT INTO feedback (user_email, convo_id, message, feedback, comment)
-                VALUES (?, ?, ?, ?, ?)
-            ''', (hashed_email, convo_id, message, feedback, comment))
-            print("[save_feedback] Inserted new feedback")
+                SELECT id FROM feedback WHERE user_email = ? AND convo_id = ? AND message = ?
+            ''', (hashed_email, convo_id, message))
+            row = c.fetchone()
 
-        conn.commit()
+            if row:
+                c.execute('''
+                    UPDATE feedback
+                    SET feedback = ?, comment = ?, timestamp = CURRENT_TIMESTAMP
+                    WHERE id = ?
+                ''', (feedback, comment, row[0]))
+                print(f"[save_feedback] Updated existing feedback (id={row[0]})")
+            else:
+                c.execute('''
+                    INSERT INTO feedback (user_email, convo_id, message, feedback, comment)
+                    VALUES (?, ?, ?, ?, ?)
+                ''', (hashed_email, convo_id, message, feedback, comment))
+                print("[save_feedback] Inserted new feedback")
+
+            conn.commit()
 
     except Exception as e:
         print(f"[save_feedback] Exception while saving feedback: {e}")
-
-    finally:
-        if conn:
-            conn.close()
 
 
 def get_feedback(convo_id, message):
@@ -517,21 +512,19 @@ def get_feedback(convo_id, message):
     hashed_email = hash_email(user_email)
 
     try:
-        conn = sqlite3.connect("feedback.db")
-        c = conn.cursor()
-        c.execute('''
-            SELECT feedback FROM feedback WHERE user_email = ? AND convo_id = ? AND message = ?
-        ''', (hashed_email, convo_id, message))
-        row = c.fetchone()
-        if row:
-            return row[0]
-        else:
-            return None
+        with sqlite3.connect("feedback.db") as conn:
+            c = conn.cursor()
+            c.execute('''
+                SELECT feedback FROM feedback WHERE user_email = ? AND convo_id = ? AND message = ?
+            ''', (hashed_email, convo_id, message))
+            row = c.fetchone()
+            if row:
+                return row[0]
+            else:
+                return None
     except Exception as e:
         print(f"[get_feedback] Exception while fetching feedback: {e}")
         return None
-    finally:
-        conn.close()
 
 
 def get_feedback_per_message(convo_id=None):
@@ -542,25 +535,24 @@ def get_feedback_per_message(convo_id=None):
     Returns:
         list: List of feedback dicts.
     """
-    conn = sqlite3.connect("feedback.db")
-    c = conn.cursor()
+    with sqlite3.connect("feedback.db") as conn:
+        c = conn.cursor()
 
-    if convo_id is None:
-        c.execute('''
-            SELECT user_email, convo_id, message, feedback, comment, timestamp
-            FROM feedback
-            ORDER BY timestamp DESC
-        ''')
-    else:
-        c.execute('''
-            SELECT user_email, convo_id, message, feedback, comment, timestamp
-            FROM feedback
-            WHERE convo_id = ?
-            ORDER BY timestamp DESC
-        ''', (convo_id,))
+        if convo_id is None:
+            c.execute('''
+                SELECT user_email, convo_id, message, feedback, comment, timestamp
+                FROM feedback
+                ORDER BY timestamp DESC
+            ''')
+        else:
+            c.execute('''
+                SELECT user_email, convo_id, message, feedback, comment, timestamp
+                FROM feedback
+                WHERE convo_id = ?
+                ORDER BY timestamp DESC
+            ''', (convo_id,))
 
-    rows = c.fetchall()
-    conn.close()
+        rows = c.fetchall()
 
     return [
         {
@@ -582,26 +574,24 @@ def get_feedback_statistics():
         dict: Statistics including total, positive, negative counts and percentage.
     """
     try:
-        conn = sqlite3.connect("feedback.db")
-        c = conn.cursor()
-        
-        c.execute("SELECT COUNT(*) FROM feedback WHERE feedback = 'positive'")
-        positive = c.fetchone()[0]
-        
-        c.execute("SELECT COUNT(*) FROM feedback WHERE feedback = 'negative'")
-        negative = c.fetchone()[0]
-        
-        total = positive + negative
-        positive_pct = (positive / total * 100) if total > 0 else 0
-        
-        conn.close()
-        
-        return {
-            "total": total,
-            "positive": positive,
-            "negative": negative,
-            "positive_percentage": round(positive_pct, 1)
-        }
+        with sqlite3.connect("feedback.db") as conn:
+            c = conn.cursor()
+            
+            c.execute("SELECT COUNT(*) FROM feedback WHERE feedback = 'positive'")
+            positive = c.fetchone()[0]
+            
+            c.execute("SELECT COUNT(*) FROM feedback WHERE feedback = 'negative'")
+            negative = c.fetchone()[0]
+            
+            total = positive + negative
+            positive_pct = (positive / total * 100) if total > 0 else 0
+            
+            return {
+                "total": total,
+                "positive": positive,
+                "negative": negative,
+                "positive_percentage": round(positive_pct, 1)
+            }
     except Exception as e:
         print(f"[get_feedback_statistics] Error: {e}")
         return {"total": 0, "positive": 0, "negative": 0, "positive_percentage": 0}
@@ -1208,19 +1198,18 @@ def clean_database():
         int: Number of entries deleted.
     """
     try:
-        conn = sqlite3.connect("feedback.db")
-        c = conn.cursor()
-        
-        cutoff_date = (datetime.now() - timedelta(days=90)).isoformat()
-        
-        c.execute("SELECT COUNT(*) FROM feedback WHERE timestamp < ?", (cutoff_date,))
-        count = c.fetchone()[0]
-        
-        c.execute("DELETE FROM feedback WHERE timestamp < ?", (cutoff_date,))
-        conn.commit()
-        conn.close()
-        
-        return count
+        with sqlite3.connect("feedback.db") as conn:
+            c = conn.cursor()
+            
+            cutoff_date = (datetime.now() - timedelta(days=90)).isoformat()
+            
+            c.execute("SELECT COUNT(*) FROM feedback WHERE timestamp < ?", (cutoff_date,))
+            count = c.fetchone()[0]
+            
+            c.execute("DELETE FROM feedback WHERE timestamp < ?", (cutoff_date,))
+            conn.commit()
+            
+            return count
     except Exception as e:
         print(f"[clean_database] Error: {e}")
         return 0
@@ -1253,22 +1242,21 @@ def export_user_data():
     # Get feedback
     hashed_email = hash_email(user_email)
     try:
-        conn = sqlite3.connect("feedback.db")
-        c = conn.cursor()
-        c.execute("SELECT * FROM feedback WHERE user_email = ?", (hashed_email,))
-        rows = c.fetchall()
-        
-        data_package["feedback"] = [
-            {
-                "convo_id": r[2],
-                "message": r[3],
-                "feedback": r[4],
-                "comment": r[5],
-                "timestamp": r[6]
-            }
-            for r in rows
-        ]
-        conn.close()
+        with sqlite3.connect("feedback.db") as conn:
+            c = conn.cursor()
+            c.execute("SELECT * FROM feedback WHERE user_email = ?", (hashed_email,))
+            rows = c.fetchall()
+            
+            data_package["feedback"] = [
+                {
+                    "convo_id": r[2],
+                    "message": r[3],
+                    "feedback": r[4],
+                    "comment": r[5],
+                    "timestamp": r[6]
+                }
+                for r in rows
+            ]
     except Exception as e:
         print(f"[export_user_data] Error: {e}")
     
@@ -1293,11 +1281,10 @@ def delete_user_data():
         
         # Delete feedback
         hashed_email = hash_email(user_email)
-        conn = sqlite3.connect("feedback.db")
-        c = conn.cursor()
-        c.execute("DELETE FROM feedback WHERE user_email = ?", (hashed_email,))
-        conn.commit()
-        conn.close()
+        with sqlite3.connect("feedback.db") as conn:
+            c = conn.cursor()
+            c.execute("DELETE FROM feedback WHERE user_email = ?", (hashed_email,))
+            conn.commit()
         
         # Clear session state
         st.session_state.conversations = []
