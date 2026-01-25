@@ -4,7 +4,38 @@ import streamlit as st
 import openai
 from gtts import gTTS
 from io import BytesIO
-from pydub import AudioSegment
+
+# Workaround for Python 3.13+ where audioop was removed
+try:
+    import audioop
+except ImportError:
+    # Python 3.13+ - audioop was removed from standard library
+    # Try to create a dummy module to prevent pydub from failing
+    import sys
+    class DummyAudioop:
+        """Dummy audioop module for Python 3.13+ compatibility"""
+        @staticmethod
+        def add(*args, **kwargs):
+            return b''
+        @staticmethod
+        def mul(*args, **kwargs):
+            return b''
+        @staticmethod
+        def tomono(*args, **kwargs):
+            return b''
+        @staticmethod
+        def tostereo(*args, **kwargs):
+            return b''
+        @staticmethod
+        def ratecv(*args, **kwargs):
+            return (b'', None)
+    sys.modules['audioop'] = DummyAudioop()
+
+try:
+    from pydub import AudioSegment
+except ImportError as e:
+    st.warning(f"⚠️ pydub import warning: {e}. Some audio features may be limited.")
+    AudioSegment = None
 
 # Ensure OpenAI API key is available
 openai.api_key = os.getenv("OPENAI_API_KEY")

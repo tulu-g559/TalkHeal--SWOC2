@@ -1,4 +1,5 @@
 import streamlit as st
+import streamlit.components.v1 as components
 import base64
 
 def get_base64_of_bin_file(bin_file):
@@ -1176,5 +1177,88 @@ def apply_custom_css():
             outline: 2px solid var(--primary-color) !important;
             outline-offset: 2px !important;
         }}
+
+        /* Cursor Trail Styles */
+        .cursor-trail {{
+            position: fixed;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            box-shadow: 0 0 10px rgba(99, 102, 241, 0.6), 0 0 20px rgba(236, 72, 153, 0.4);
+            opacity: 0.8;
+            transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+        }}
+
+        .cursor-trail.fade-out {{
+            opacity: 0;
+            transform: scale(0.5);
+        }}
     </style>
     """, unsafe_allow_html=True)
+    
+    # Add cursor trail with hearts and sparkles using components.html()
+    components.html(r"""
+    <script>
+    (function() {
+        var targetWindow = window.parent !== window ? window.parent : window;
+        var targetDoc = targetWindow.document;
+        
+        if (targetWindow.__cursorTrailInit) return;
+        targetWindow.__cursorTrailInit = true;
+        
+        var trail = [];
+        var mx = 0, my = 0;
+        var len = 20;
+        
+        // Only hearts and sparkles
+        function createTrail() {
+            if (!targetDoc.body) {
+                setTimeout(createTrail, 100);
+                return;
+            }
+            
+            targetDoc.querySelectorAll('.ct-heart, .ct-sparkle').forEach(function(el) { el.remove(); });
+            trail = [];
+            
+            for (var i = 0; i < len; i++) {
+                var d = targetDoc.createElement('div');
+                var isHeart = i % 2 === 0;
+                var symbol = isHeart ? '💕' : '✨';
+                var color = isHeart ? '#ff69b4' : '#ffd700';
+                d.className = isHeart ? 'ct-heart' : 'ct-sparkle';
+                d.textContent = symbol;
+                d.style.cssText = 'position:fixed;pointer-events:none;z-index:999999;font-size:' + (12 + i * 0.5) + 'px;color:' + color + ';text-shadow:0 0 8px ' + color + ',0 0 16px ' + color + ';opacity:' + ((len-i)/len * 0.8) + ';left:0;top:0;transform:translate(-50%,-50%) rotate(' + (i * 18) + 'deg);transition:opacity 0.2s;';
+                targetDoc.body.appendChild(d);
+                trail.push({el:d, x:targetWindow.innerWidth/2, y:targetWindow.innerHeight/2, rot:i*18});
+            }
+            
+            targetWindow.addEventListener('mousemove', function(e) {
+                mx = e.clientX;
+                my = e.clientY;
+            });
+            
+            function animate() {
+                for (var i = 0; i < trail.length; i++) {
+                    var next = trail[i+1] || {x:mx, y:my};
+                    trail[i].x += (next.x - trail[i].x) * 0.3;
+                    trail[i].y += (next.y - trail[i].y) * 0.3;
+                    trail[i].rot += 2;
+                    trail[i].el.style.left = trail[i].x + 'px';
+                    trail[i].el.style.top = trail[i].y + 'px';
+                    trail[i].el.style.transform = 'translate(-50%,-50%) rotate(' + trail[i].rot + 'deg) scale(' + (0.6 + i/len * 0.4) + ')';
+                }
+                targetWindow.requestAnimationFrame(animate);
+            }
+            animate();
+        }
+        
+        if (targetDoc.readyState === "complete") createTrail();
+        else targetWindow.addEventListener("load", createTrail);
+        
+        setTimeout(createTrail, 500);
+    })();
+    </script>
+    """, height=0, width=0)

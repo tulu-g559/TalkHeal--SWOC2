@@ -133,6 +133,80 @@ def set_background_for_theme(selected_palette="pink"):
 selected_palette = st.session_state.get("palette_name", "Pink")
 set_background_for_theme(selected_palette)
 
+import streamlit.components.v1 as components
+components.html(r"""
+<script>
+(function() {
+    var targetWindow = window.parent !== window ? window.parent : window;
+    var targetDoc = targetWindow.document;
+    
+    if (targetWindow.__cursorTrailInit) return;
+    targetWindow.__cursorTrailInit = true;
+    
+    var trail = [];
+    var mx = 0, my = 0;
+    var len = 12;
+    var animationId = null;
+    var lastTime = 0;
+    var fps = 60;
+    var frameInterval = 1000 / fps;
+    
+    function createTrail() {
+        if (!targetDoc.body) {
+            setTimeout(createTrail, 100);
+            return;
+        }
+        
+        targetDoc.querySelectorAll('.ct-heart').forEach(function(el) { el.remove(); });
+        trail = [];
+        
+        for (var i = 0; i < len; i++) {
+            var d = targetDoc.createElement('div');
+            var symbol = '💕';
+            var color = '#ff69b4';
+            d.className = 'ct-heart';
+            d.textContent = symbol;
+            d.style.cssText = 'position:fixed;pointer-events:none;z-index:999999;font-size:' + (12 + i * 0.5) + 'px;color:' + color + ';text-shadow:0 0 8px ' + color + ',0 0 16px ' + color + ';opacity:' + ((len-i)/len * 0.8) + ';left:0;top:0;transform:translate(-50%,-50%) rotate(' + (i * 18) + 'deg);transition:opacity 0.2s;';
+            targetDoc.body.appendChild(d);
+            trail.push({el:d, x:targetWindow.innerWidth/2, y:targetWindow.innerHeight/2, rot:i*18});
+        }
+        
+        targetWindow.addEventListener('mousemove', function(e) {
+            mx = e.clientX;
+            my = e.clientY;
+        });
+        
+        function animate(currentTime) {
+            if (currentTime - lastTime < frameInterval) {
+                animationId = requestAnimationFrame(animate);
+                return;
+            }
+            lastTime = currentTime;
+            
+            for (var i = 0; i < trail.length; i++) {
+                var next = trail[i+1] || {x:mx, y:my};
+                trail[i].x += (next.x - trail[i].x) * 0.25;
+                trail[i].y += (next.y - trail[i].y) * 0.25;
+                trail[i].rot += 1.5;
+                
+                var transform = 'translate(-50%,-50%) rotate(' + trail[i].rot + 'deg) scale(' + (0.6 + i/len * 0.4) + ')';
+                trail[i].el.style.left = trail[i].x + 'px';
+                trail[i].el.style.top = trail[i].y + 'px';
+                trail[i].el.style.transform = transform;
+            }
+            animationId = requestAnimationFrame(animate);
+        }
+        animate();
+    }
+    
+    if (targetDoc.readyState === "complete") createTrail();
+    else targetWindow.addEventListener("load", createTrail);
+    
+    setTimeout(createTrail, 500);
+})();
+</script>
+""", height=0, width=0)
+
 # --- CONFIG & CONSTANTS ---
 TECHNIQUES = {
     "Default Relaxation (4-2-4)": {"inhale": 4, "hold1": 2, "exhale": 4, "hold2": 0},
