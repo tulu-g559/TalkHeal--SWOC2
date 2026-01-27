@@ -32,9 +32,47 @@ The vision for TalkHeal is to address these challenges by providing accessible, 
 
 In essence, TalkHeal aims to destigmatize mental health, promote self-awareness, and make evidence-based support accessible to everyone. By integrating compassionate AI with a comprehensive toolkit of wellness resources, TalkHeal seeks to become a trusted companion on the journey toward a healthier and more balanced life.
 
-## 🚀 Live Demo
+---
 
+## 🏗️ Architecture & Logic Flow
+To help contributors understand how **TalkHeal** integrates AI, databases, and wellness tools, here is a breakdown of our internal logic.
+
+### 🔄 User Interaction Lifecycle
+This sequence shows how your message is processed through the chosen AI personality and logged for your mood history.
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Streamlit_UI
+    participant Tone_Selector
+    participant Gemini_API
+    participant SQLite_DB
+
+    User->>Streamlit_UI: Enters message
+    Streamlit_UI->>Tone_Selector: Fetch selected Tone (e.g., Wise Friend)
+    Tone_Selector->>Gemini_API: Prompt + Context + Tone Instructions
+    Gemini_API-->>Streamlit_UI: Empathetic Response
+    Streamlit_UI->>SQLite_DB: Log Session/Mood
+```
+
+### 🧠 Intelligence Hub Routing
+TalkHeal isn't just a chatbot; it's a wellness engine. Depending on your mood input, the system routes you to specific therapeutic tools.
+
+```mermaid
+graph TD
+    A[User Logins] --> B{Mood Input}
+    B -- Negative/Stressed --> C[Coping Tips & Breathing]
+    B -- High Energy --> D[Yoga Recommendation Engine]
+    B -- Overwhelmed --> E[Emergency Help / Crisis Page]
+    C --> F[SQLite Journal Entry]
+    D --> F
+```
+
+---
+
+## 🚀 Live Demo
 Experience TalkHeal live here: 
+
 👉 [![**TalkHeal**](https://img.shields.io/badge/View-Live%20Demo-magenta?style=for-the-badge)](https://TalkHeal.app/)
 
  <div align="center">
@@ -60,6 +98,8 @@ Experience TalkHeal live here:
   <img src="static_files/Home_Pink.png" alt="TalkHeal main dashboard interface with pink theme showing welcome message and navigation options" width="600"/>
   <br>
 </div>
+
+---
 
 ## ✨ Features 
 <div align="center">
@@ -185,6 +225,8 @@ This will create:
 
 **Note**: Database files (`.db`) are automatically ignored by git to prevent conflicts and protect user data.
 
+---
+
 ## 📺 Video Explanation
 
 For a detailed walkthrough of TalkHeal's features and how to use them, check out this video:
@@ -273,11 +315,9 @@ TalkHeal/
 └── users.db                    # Database for user authentication
 
 ```
-
 </details>
 
 ---
-
 
 ## 🛠️ Technologies Used
 
@@ -300,29 +340,24 @@ TalkHeal/
 > Clone and run locally using Python and Streamlit.
 
 1. **Clone the repository:**
-
    ```bash
    git clone https://github.com/eccentriccoder01/TalkHeal.git
    cd TalkHeal
    ```
 
 2. **Install dependencies:**
-
    ```bash
    pip install -r requirements.txt
    ```
-
    > **Having installation issues?** Check our [Installation Troubleshooting Guide](INSTALLATION_TROUBLESHOOTING.md) for solutions to common problems like timeout errors, slow downloads, and network issues.
 
 3. **Set up API key:**
    Go to your Streamlit [Secrets Settings](https://streamlit.io/cloud) and add:
-
    ```toml
    GEMINI_API_KEY = "YOUR_GOOGLE_GEMINI_API_KEY"
    ```
 
-4. **Set up OAuth (Optional but Recommended):**
-   
+4. **Set up OAuth (Optional but Recommended):**   
    Create a `.env` file in the TalkHeal directory:
    
    ```env
@@ -345,13 +380,11 @@ TalkHeal/
    For detailed OAuth setup instructions, see [OAUTH_SETUP.md](OAUTH_SETUP.md)
 
 5. **Run the app:**
-
    ```bash
    streamlit run TalkHeal.py
    ```
 
 6. **Test OAuth setup (Optional):**
-
    ```bash
    python test_oauth.py
    ```
@@ -360,6 +393,8 @@ TalkHeal/
 
 ## Issue Creation ✴
 Report bugs and  issues or propose improvements through our GitHub repository.
+
+---
 
 ## Contribution Guidelines 📑
 
@@ -375,13 +410,15 @@ Report bugs and  issues or propose improvements through our GitHub repository.
 - Add Screenshots and updated website links to help us understand what changes is all about.
 
 - Check the [CONTRIBUTING.md](CONTRIBUTING.md) for detailed steps...
-    
-## Contributing is fun🧡
+
+### Contributing is fun🧡
 
 We welcome all contributions and suggestions!
 Whether it's a new feature, design improvement, or a bug fix — your voice matters 💜
 
 Your insights are invaluable to us. Reach out to us team for any inquiries, feedback, or concerns.
+
+---
 
 ## 👥 Contributors
 
@@ -401,9 +438,13 @@ Thanks to these wonderful people for contributing 💖
   </a>
 </p>
 
+---
+
 ## 📄 License
 
 This project is open-source and available under the [MIT License](LICENSE).
+
+---
 
 ## 📞 Contact
 
