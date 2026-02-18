@@ -19,7 +19,7 @@ streamlit_js_eval
 extra-streamlit-components
 scikit-learn
 joblib
-numpy
+numpy #<2.0 (recomended)
 PyJWT
 statsmodels
 prophet
